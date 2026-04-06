@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gionee-backend
+spec:
+  replicas: 2 # We run 2 copies for high availability!
+  selector:
+    matchLabels:
+      app: gionee
+  template:
+    metadata:
+      labels:
+        app: gionee
+    spec:
+      containers:
+        - name: gionee-app
+          image: yourusername/gionee-backend:latest # Remember to change 'yourusername'!
+          ports:
+            - containerPort: 8000
+          env:
+            - name: GROQ_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: gionee-secrets
+                  key: groq-api-key

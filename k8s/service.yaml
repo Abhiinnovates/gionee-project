@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gionee-service
+spec:
+  type: LoadBalancer # This requests a public IP from Google Cloud
+  selector:
+    app: gionee
+  ports:
+    - protocol: TCP
+      port: 80 # The public port
+      targetPort: 8000 # The port your FastAPI container uses
