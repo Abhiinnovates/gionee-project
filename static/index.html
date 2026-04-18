@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gionee | Advanced AI Engine</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --accent-glow: #38bdf8;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            /* Subtle animated background gradient */
+            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+        }
+
+        /* Kinetic Typography Header */
+        header {
+            margin-top: 8vh;
+            text-align: center;
+            perspective: 1000px;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin: 0;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -2px;
+            opacity: 0; /* Hidden for GSAP intro */
+            transform: translateY(30px) rotateX(-20deg);
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0;
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            margin: 40px auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            opacity: 0; /* Hidden for GSAP */
+            transform: translateY(20px);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Micro-interaction Inputs */
+        input, select {
+            width: 100%;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-glow);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Hover & Active Button Animations */
+        button.generate-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #38bdf8, #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button.generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        button.generate-btn:active {
+            transform: translateY(1px);
+        }
+
+        button.generate-btn:disabled {
+            background: #475569;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Loading Animation (CSS Keyframes) */
+        .loader-container {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top-color: var(--accent-glow);
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Results Area */
+        #quizContainer { display: none; width: 100%; max-width: 800px; margin-bottom: 100px; }
+        
+        .question-block {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            opacity: 0; /* Handled by GSAP Stagger */
+            transform: translateY(30px);
+        }
+
+        h3 { color: var(--accent-glow); margin-top: 0; }
+        ul { list-style: none; padding: 0; }
+        li { 
+            background: rgba(0,0,0,0.3); 
+            padding: 12px 15px; 
+            margin-bottom: 8px; 
+            border-radius: 8px; 
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+        li:hover { border-color: rgba(255,255,255,0.2); transform: translateX(5px); }
+        
+        .reveal-btn {
+            background: transparent;
+            border: 1px solid var(--accent-glow);
+            color: var(--accent-glow);
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+        .reveal-btn:hover { background: var(--accent-glow); color: #000; }
+        
+        .explanation {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 3px solid #10b981;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 class="gsap-title">Gionee</h1>
+        <div class="subtitle gsap-subtitle">Neural Study Engine</div>
+    </header>
+
+    <div class="glass-card gsap-card">
+        <form id="quizForm">
+            <div class="form-group">
+                <label>Target Knowledge Node</label>
+                <input type="text" id="topic" placeholder="e.g., Quantum Mechanics, DevOps..." required autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>Complexity</label>
+                <select id="difficulty">
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate" selected>Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Volume (1-10)</label>
+                <input type="number" id="num_questions" min="1" max="10" value="3" required>
+            </div>
+            <button type="submit" id="submitBtn" class="generate-btn">Initialize Generation</button>
+        </form>
+    </div>
+
+    <div class="loader-container" id="loader">
+        <div class="spinner"></div>
+        <div style="color: var(--text-muted); letter-spacing: 1px; font-size: 0.9rem;">Synthesizing Parameters...</div>
+    </div>
+    
+    <div id="quizContainer">
+        <h2 id="quizTitle" style="text-align: center; margin-bottom: 30px;"></h2>
+        <div id="questionsArea"></div>
+    </div>
+
+    <script>
+        // --- 1. Initial Load Animations (GSAP) ---
+        // Kinetic typography and glass card entry
+        gsap.to(".gsap-title", { opacity: 1, y: 0, rotateX: 0, duration: 1, ease: "power3.out", delay: 0.2 });
+        gsap.to(".gsap-subtitle", { opacity: 1, duration: 1, ease: "power2.out", delay: 0.6 });
+        gsap.to(".gsap-card", { opacity: 1, y: 0, duration: 1, ease: "back.out(1.2)", delay: 0.4 });
+
+        // --- 2. Application Logic ---
+        document.getElementById('quizForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const topic = document.getElementById('topic').value;
+            const difficulty = document.getElementById('difficulty').value;
+            const num_questions = parseInt(document.getElementById('num_questions').value);
+            
+            const btn = document.getElementById('submitBtn');
+            const loader = document.getElementById('loader');
+            const container = document.getElementById('quizContainer');
+            
+            // UI State Change
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+            loader.style.display = 'block';
+            
+            // Fade out old quiz if it exists
+            gsap.to(container, { opacity: 0, duration: 0.3, onComplete: () => container.style.display = 'none' });
+
+            try {
+                const response = await fetch('/api/v1/quiz', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic, difficulty, num_questions })
+                });
+
+                if (!response.ok) throw new Error("Failed to generate quiz");
+                
+                const data = await response.json();
+                renderQuiz(data);
+                
+            } catch (error) {
+                alert("Error connecting to neural engine. Check terminal logs.");
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Initialize Generation";
+                loader.style.display = 'none';
+            }
+        });
+
+        function renderQuiz(data) {
+            const container = document.getElementById('quizContainer');
+            const area = document.getElementById('questionsArea');
+            
+            container.style.display = 'block';
+            gsap.set(container, { opacity: 1 }); // Reset opacity
+            
+            document.getElementById('quizTitle').innerHTML = `<span style="color: white;">Topic:</span> <span style="color: var(--accent-glow)">${data.topic}</span>`;
+            area.innerHTML = ''; 
+
+            data.questions.forEach((q, index) => {
+                const qBlock = document.createElement('div');
+                qBlock.className = 'question-block';
+                
+                let optionsHtml = q.options.map(opt => `<li>${opt}</li>`).join('');
+                
+                qBlock.innerHTML = `
+                    <h3>0${index + 1}. ${q.question_text}</h3>
+                    <ul>${optionsHtml}</ul>
+                    <button class="reveal-btn" onclick="toggleExplanation(this, ${index})">Decrypt Answer</button>
+                    <div class="explanation" id="exp-${index}">
+                        <strong style="color: #10b981;">Target Verified:</strong> ${q.correct_answer}<br><br>
+                        <span style="color: var(--text-muted);">${q.explanation}</span>
+                    </div>
+                `;
+                area.appendChild(qBlock);
+            });
+
+            // --- 3. Scroll-Driven Stagger Animation (GSAP) ---
+            // This makes the questions cascade in beautifully one after the other
+            gsap.to(".question-block", {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                stagger: 0.15,
+                ease: "power2.out",
+                delay: 0.1
+            });
+        }
+
+        // --- 4. Micro-interactions ---
+        function toggleExplanation(btn, index) {
+            const exp = document.getElementById(`exp-${index}`);
+            if (exp.style.display === 'block') {
+                gsap.to(exp, { opacity: 0, height: 0, duration: 0.3, onComplete: () => exp.style.display = 'none' });
+                btn.innerText = 'Decrypt Answer';
+            } else {
+                exp.style.display = 'block';
+                gsap.fromTo(exp, 
+                    { opacity: 0, height: 0 }, 
+                    { opacity: 1, height: "auto", duration: 0.4, ease: "power2.out" }
+                );
+                btn.innerText = 'Hide Data';
+            }
+        }
+    </script>
+</body>
+</html>
