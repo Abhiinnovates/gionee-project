@@ -5,15 +5,22 @@ metadata:
   namespace: default
   annotations:
     kubernetes.io/ingress.class: traefik
+    # This line wakes up Cert-Manager!
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
+  # This block tells Kubernetes to secure the domain using the requested cert
+  tls:
+    - hosts:
+        - yourdomain.com # <-- YOUR DOMAIN HERE
+      secretName: gionee-tls-cert
   rules:
-    - host: brainorbit.in # <-- CHANGE THIS TO YOUR EXACT DOMAIN
+    - host: brainorbit.in # <-- YOUR DOMAIN HERE
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: gionee-service # This must match the name in your service.yaml
+                name: gionee-service
                 port:
-                  number: 80 # This must match the port in your service.yaml
+                  number: 80
