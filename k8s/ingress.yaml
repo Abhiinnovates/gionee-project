@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gionee-ingress
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+    - host: brainorbit.in # <-- CHANGE THIS TO YOUR EXACT DOMAIN
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gionee-service # This must match the name in your service.yaml
+                port:
+                  number: 80 # This must match the port in your service.yaml
