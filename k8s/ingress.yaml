@@ -11,7 +11,7 @@ spec:
   # This block tells Kubernetes to secure the domain using the requested cert
   tls:
     - hosts:
-        - yourdomain.com # <-- YOUR DOMAIN HERE
+        - brainorbit.in # <-- YOUR DOMAIN HERE
       secretName: gionee-tls-cert
   rules:
     - host: brainorbit.in # <-- YOUR DOMAIN HERE
